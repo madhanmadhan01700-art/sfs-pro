@@ -1,3 +1,4 @@
+// SFS Pro Security Operations Center (SOC) Dashboard - Modern Client-Server Implementation
 import React, { useState, useEffect } from "react";
 import { ShieldAlert, ShieldCheck, Activity, ListOrdered, Play, FileText, BarChart, Settings, Menu, X, ShieldCheck as ShieldIcon } from "lucide-react";
 import DashboardView from "./components/DashboardView";
