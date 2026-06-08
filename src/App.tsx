@@ -7,6 +7,7 @@ import SimulatorView from "./components/SimulatorView";
 import LogsView from "./components/LogsView";
 import AnalyticsView from "./components/AnalyticsView";
 import SettingsView from "./components/SettingsView";
+import { getDashboardSummary } from "./services/api";
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<string>("Dashboard");
@@ -16,11 +17,8 @@ export default function App() {
   // Poll firewall state on mount & page changes
   const checkStatus = async () => {
     try {
-      const res = await fetch("/api/dashboard-summary");
-      if (res.ok) {
-        const data = await res.json();
-        setFirewallStatus(data.status);
-      }
+      const data = await getDashboardSummary();
+      setFirewallStatus(data.status);
     } catch (e) {
       console.error("Status checks connection bypassed:", e);
     }

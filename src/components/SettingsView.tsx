@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Settings, Shield, ShieldAlert, ShieldCheck, Database, RefreshCw, Trash2, Power } from "lucide-react";
+import { getDashboardSummary, toggleFirewallStatus, resetDatabase } from "../services/api";
 
 export default function SettingsView() {
   const [active, setActive] = useState(true);
@@ -11,9 +12,7 @@ export default function SettingsView() {
   const fetchStatus = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/dashboard-summary");
-      if (!res.ok) throw new Error("Could not fetch server setting summaries");
-      const data = await res.json();
+      const data = await getDashboardSummary();
       setActive(data.status);
       setTotalRules(data.rulesCount);
       setTotalLogs(data.total);
@@ -31,12 +30,10 @@ export default function SettingsView() {
   const handleToggleState = async () => {
     try {
       setSyncing(true);
-      const res = await fetch("/api/status/toggle", { method: "POST" });
-      if (!res.ok) throw new Error("Server toggle request rejected");
-      const data = await res.json();
-      setActive(data.active);
+      const updatedActive = await toggleFirewallStatus();
+      setActive(updatedActive);
     } catch (err: any) {
-      alert("Error togling firewall: " + err.message);
+      alert("Error toggling firewall: " + err.message);
     } finally {
       setSyncing(false);
     }
@@ -53,8 +50,7 @@ export default function SettingsView() {
 
     try {
       setSyncing(true);
-      const res = await fetch("/api/reset", { method: "POST" });
-      if (!res.ok) throw new Error("System re-indexing reject");
+      await resetDatabase();
       await fetchStatus();
       alert("System returned to factory production defaults!");
     } catch (err: any) {

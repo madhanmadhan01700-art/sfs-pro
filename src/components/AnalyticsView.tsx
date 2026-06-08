@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BarChart3, Activity, Ban, ShieldAlert, CheckCircle, RefreshCw, Layers } from "lucide-react";
 import { AnalyticsStats, DailyTrafficTrend, BlockedIP, BlockedPort } from "../types";
+import { getAnalyticsStats } from "../services/api";
 
 export default function AnalyticsView() {
   const [stats, setStats] = useState<AnalyticsStats | null>(null);
@@ -9,9 +10,7 @@ export default function AnalyticsView() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/analytics/stats");
-      if (!res.ok) throw new Error("Could not acquire analytics dashboard data");
-      const data = await res.json();
+      const data = await getAnalyticsStats();
       setStats(data);
     } catch (err: any) {
       console.error(err);

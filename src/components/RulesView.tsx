@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Search, Edit2, ShieldAlert, Activity, Filter, Info, X } from "lucide-react";
 import { Rule } from "../types";
+import { getRules, addRule, deleteRule } from "../services/api";
 
 export default function RulesView() {
   const [rules, setRules] = useState<Rule[]>([]);
@@ -22,9 +23,7 @@ export default function RulesView() {
   const fetchRules = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/rules");
-      if (!res.ok) throw new Error("Failed to fetch security rules");
-      const data = await res.json();
+      const data = await getRules();
       setRules(data);
     } catch (err: any) {
       alert("Error fetching rules: " + err.message);
@@ -73,7 +72,7 @@ export default function RulesView() {
       // or implement full updating! Let's delete the old rule id first if editing, then submit! 
       // This is a highly robust and simple way to support 'Edit Rule' in this filesystem DB model.
       if (editingRuleId) {
-        await fetch(`/api/rules/${editingRuleId}`, { method: "DELETE" });
+        await deleteRule(editingRuleId);
       }
 
       const rulePayload = {
@@ -85,13 +84,7 @@ export default function RulesView() {
         description: description.trim()
       };
 
-      const res = await fetch("/api/rules", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(rulePayload)
-      });
-
-      if (!res.ok) throw new Error("Could not index firewall rule");
+      await addRule(rulePayload);
       
       setShowAddForm(false);
       fetchRules();
@@ -103,8 +96,7 @@ export default function RulesView() {
   const handleDeleteRule = async (id: string) => {
     if (!confirm("Are you sure you want to remove this firewall policy?")) return;
     try {
-      const res = await fetch(`/api/rules/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Could not delete firewall rule");
+      await deleteRule(id);
       fetchRules();
     } catch (err: any) {
       alert("Error deleting rule: " + err.message);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Shield, ShieldAlert, Activity, CheckCircle, Ban, RefreshCw, Layers, Plus } from "lucide-react";
 import { DashboardSummary, TrafficLog } from "../types";
+import { getDashboardSummary, toggleFirewallStatus, generateTraffic } from "../services/api";
 
 interface DashboardViewProps {
   onNavigate: (page: string) => void;
@@ -15,9 +16,7 @@ export default function DashboardView({ onNavigate }: DashboardViewProps) {
   const fetchSummary = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/dashboard-summary");
-      if (!res.ok) throw new Error("Failed to fetch dashboard metrics");
-      const summary = await res.json();
+      const summary = await getDashboardSummary();
       setData(summary);
       setError(null);
     } catch (err: any) {
@@ -33,11 +32,9 @@ export default function DashboardView({ onNavigate }: DashboardViewProps) {
 
   const handleToggleFirewall = async () => {
     try {
-      const res = await fetch("/api/status/toggle", { method: "POST" });
-      if (!res.ok) throw new Error("Failed to toggle firewall status");
-      const statusData = await res.json();
+      const active = await toggleFirewallStatus();
       if (data) {
-        setData({ ...data, status: statusData.active });
+        setData({ ...data, status: active });
       }
     } catch (err: any) {
       alert("Error toggling firewall: " + err.message);
@@ -47,12 +44,7 @@ export default function DashboardView({ onNavigate }: DashboardViewProps) {
   const handleGenerateTraffic = async (count: number) => {
     try {
       setGenerating(true);
-      const res = await fetch("/api/generate-traffic", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count })
-      });
-      if (!res.ok) throw new Error("Failed to generate simulated attacks");
+      await generateTraffic(count);
       await fetchSummary();
     } catch (err: any) {
       alert("Error generating traffic: " + err.message);

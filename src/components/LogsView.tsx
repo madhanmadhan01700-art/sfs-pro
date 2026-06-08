@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Download, Search, Table, RefreshCw, Calendar, Trash2, Filter } from "lucide-react";
 import { TrafficLog } from "../types";
+import { getLogs } from "../services/api";
 
 export default function LogsView() {
   const [logs, setLogs] = useState<TrafficLog[]>([]);
@@ -15,16 +16,12 @@ export default function LogsView() {
   const fetchLogs = async () => {
     try {
       setLoading(true);
-      // Construct query string search
-      const params = new URLSearchParams();
-      if (search.trim()) params.append("search", search.trim());
-      if (decisionFilter !== "All") params.append("decision", decisionFilter);
-      if (protocolFilter !== "All") params.append("protocol", protocolFilter);
-      if (dateFilter) params.append("date", dateFilter);
-
-      const res = await fetch(`/api/logs?${params.toString()}`);
-      if (!res.ok) throw new Error("Failed to load connection log registry");
-      const data = await res.json();
+      const data = await getLogs({
+        search: search.trim(),
+        decision: decisionFilter,
+        protocol: protocolFilter,
+        date: dateFilter
+      });
       setLogs(data);
     } catch (err: any) {
       alert("Error loading logs: " + err.message);
@@ -58,16 +55,36 @@ export default function LogsView() {
           </p>
         </div>
 
-        {/* CSV export link */}
-        <a
-          href="/api/logs/export"
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* CSV export button */}
+        <button
+          onClick={() => {
+            const headers = ["Timestamp", "Source IP", "Destination Port", "Protocol", "Decision", "Matched Rule"];
+            const rows = logs.map(l => [
+              l.timestamp,
+              l.source_ip,
+              l.destination_port,
+              l.protocol,
+              l.decision,
+              l.matched_rule
+            ]);
+            
+            // Build CSV content in proper encoding
+            const csvContent = "data:text/csv;charset=utf-8," 
+              + [headers.join(","), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(","))].join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `sfs_firewall_audit_logs_${Date.now()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
           className="px-4 py-2 text-xs font-sans font-bold rounded-lg text-[#0f172a] sleek-button-primary shadow-lg flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
         >
           <Download className="w-3.5 h-3.5" />
           Export to CSV
-        </a>
+        </button>
       </div>
 
       {/* Advanced Filter Panel */}

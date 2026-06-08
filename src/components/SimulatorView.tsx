@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Terminal, Cpu, Info, ShieldAlert, CheckCircle, Ban, RefreshCw, Send, ShieldCheck } from "lucide-react";
+import { simulatePacket } from "../services/api";
 
 export default function SimulatorView() {
   const [ip, setIp] = useState("192.168.1.100");
@@ -58,18 +59,11 @@ export default function SimulatorView() {
     await new Promise(r => setTimeout(r, 800));
 
     try {
-      const res = await fetch("/api/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          source_ip: ip.trim(),
-          destination_port: parseInt(port, 10) || 0,
-          protocol
-        })
+      const data = await simulatePacket({
+        source_ip: ip.trim(),
+        destination_port: port.trim(),
+        protocol
       });
-
-      if (!res.ok) throw new Error("Simulator endpoint failed to process traffic input");
-      const data = await res.json();
       
       setResult({
         decision: data.decision,
