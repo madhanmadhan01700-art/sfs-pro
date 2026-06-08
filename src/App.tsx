@@ -72,7 +72,7 @@ export default function App() {
           <div className="w-8 h-8 bg-[#38bdf8] rounded-lg flex items-center justify-center font-bold text-[#0f172a] text-sm">
             S
           </div>
-          <span className="font-extrabold text-md tracking-wider text-white">
+          <span className="font-extrabold text-md tracking-wider text-white border-none">
             SFS <span className="text-[#38bdf8]">PRO</span>
           </span>
         </div>
