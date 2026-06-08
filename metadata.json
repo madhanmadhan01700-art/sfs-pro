@@ -1,0 +1,6 @@
+{
+  "name": "Simple Firewall Simulator",
+  "description": "An educational network firewall simulator with rule management, live packet visualizer, traffic logs download, and interactive analytics charts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
